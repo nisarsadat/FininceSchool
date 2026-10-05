@@ -1,0 +1,918 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../js/**/*.vue';
+@source '../js/**/*.js';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', 'Noto Sans Arabic', 'Noto Naskh Arabic', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Mono', monospace;
+
+    /* The ledger leans on hairlines and tight corners rather than soft shadows.
+       Re-scaling the radius tokens here re-skins every `rounded-*` utility in the
+       page markup too, so the whole system tightens up in one place. */
+    --radius-xs: 1px;
+    --radius-sm: 2px;
+    --radius-md: 3px;
+    --radius-lg: 3px;
+    --radius-xl: 4px;
+    --radius-2xl: 4px;
+    --radius-3xl: 6px;
+    --radius-4xl: 8px;
+
+    --radius-card: 4px;
+    --radius-control: 3px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens — editorial ledger                                    */
+/*                                                                     */
+/*  Warm paper, near-black ink, hairline rules, tabular numerals and a */
+/*  single restrained teal accent. Surfaces carry a faint warm cast so */
+/*  the page reads as paper rather than screen.                        */
+/* ------------------------------------------------------------------ */
+:root {
+    --bg: #f2efe9;
+    --surface: #fbfaf7;
+    --surface-2: #eae6dd;
+    --ink: #16150f;
+    --muted: #6b6659;
+    --line: #dcd6c9;
+    --line-soft: #e8e3d8;
+
+    --primary: #0f5c55;
+    --primary-strong: #0a423d;
+    --primary-ink: #0c4f49;
+    --primary-soft: #dfeae6;
+    --ring: rgba(15, 92, 85, .2);
+    --accent2: #0f5c55;
+
+    --emerald-ink: #1c6b3f;
+    --rose-ink: #9d2b20;
+    --amber-ink: #8a5a10;
+    --shadow-soft: 0 1px 0 rgba(22, 21, 15, .04);
+    --shadow-pop: 0 1px 2px rgba(22, 21, 15, .1), 0 12px 28px -12px rgba(22, 21, 15, .28);
+
+    /* The rail is ink rather than a separate dark theme, so navigation reads as part of the system. */
+    --rail: #16150f;
+    --rail-ink: #f4f1e9;
+    --rail-muted: #a29b8a;
+    --rail-faint: #756e5d;
+    --rail-accent: #7fc4b4;
+    --rail-line: rgba(244, 241, 233, .12);
+    --rail-wash: rgba(244, 241, 233, .06);
+    --rail-w: 248px;
+    --rail-gap: 14px;
+}
+
+html.dark {
+    --bg: #131310;
+    --surface: #1b1b17;
+    --surface-2: #262620;
+    --ink: #f0ece2;
+    --muted: #9d968a;
+    --line: #35342d;
+    --line-soft: #2a2a24;
+
+    --primary: #4fbfae;
+    --primary-strong: #74d6c5;
+    --primary-ink: #74d6c5;
+    --primary-soft: rgba(79, 191, 174, .14);
+    --ring: rgba(79, 191, 174, .28);
+    --accent2: #4fbfae;
+
+    --emerald-ink: #63c98d;
+    --rose-ink: #f08a7c;
+    --amber-ink: #e0b25f;
+    --shadow-soft: 0 1px 0 rgba(0, 0, 0, .3);
+    --shadow-pop: 0 1px 2px rgba(0, 0, 0, .5), 0 16px 32px -12px rgba(0, 0, 0, .6);
+
+    --rail: #0e0e0c;
+    --rail-ink: #f0ece2;
+    --rail-muted: #948d80;
+    --rail-faint: #666055;
+    --rail-accent: #74d6c5;
+    --rail-line: rgba(240, 236, 226, .1);
+    --rail-wash: rgba(240, 236, 226, .05);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    /* Plus Jakarta Sans leads even in RTL: it has no Arabic glyphs, so Persian and
+       Pashto fall through to the Arabic faces while Latin stays in the UI sans
+       instead of dropping to the serif Latin inside Noto Naskh. */
+    [dir='rtl'] body {
+        font-family: 'Plus Jakarta Sans', 'Noto Naskh Arabic', 'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+    }
+
+    ::selection {
+        background: var(--ring);
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in srgb, var(--muted) 40%, transparent) transparent;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Components                                                         */
+/* ------------------------------------------------------------------ */
+@layer components {
+    .page-title {
+        @apply text-[26px] font-bold tracking-tight;
+    }
+
+    .muted {
+        color: var(--muted);
+    }
+
+    /* A ledger rule: a hairline under the page heading, with the title and its
+       actions sitting on either side of it. */
+    .page-head {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 1rem;
+        margin-bottom: 1.75rem;
+    }
+    .page-head .page-title + p {
+        margin-top: .35rem;
+        font-size: 13.5px;
+        color: var(--muted);
+    }
+
+    /* Buttons — square-ish, no gradients, ink-on-teal for primary. */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 text-sm font-semibold transition-colors duration-150 select-none;
+        border-radius: var(--radius-control);
+        border: 1px solid transparent;
+        padding: .5rem .9rem;
+    }
+    .btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px var(--ring);
+    }
+    .btn:active {
+        transform: translateY(.5px);
+    }
+    .btn:disabled {
+        opacity: .45;
+        pointer-events: none;
+    }
+    .btn .mdi {
+        font-size: 1.05rem;
+    }
+    .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary-strong);
+    }
+    html.dark .btn-primary {
+        color: #0e2724;
+    }
+    .btn-primary:hover {
+        background: var(--primary-strong);
+        border-color: var(--primary-strong);
+    }
+    .btn-ghost {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--line);
+    }
+    .btn-ghost:hover {
+        background: var(--surface-2);
+        border-color: var(--muted);
+    }
+    .btn-danger {
+        background: transparent;
+        color: var(--rose-ink);
+        border-color: color-mix(in srgb, var(--rose-ink) 40%, transparent);
+    }
+    .btn-danger:hover {
+        background: var(--rose-ink);
+        color: #fff;
+        border-color: var(--rose-ink);
+    }
+    .btn-success {
+        background: transparent;
+        color: var(--emerald-ink);
+        border-color: color-mix(in srgb, var(--emerald-ink) 40%, transparent);
+    }
+    .btn-success:hover {
+        background: var(--emerald-ink);
+        color: #fff;
+        border-color: var(--emerald-ink);
+    }
+    .btn-sm {
+        @apply px-2.5 py-1 text-xs;
+    }
+
+    /* Icon button */
+    .icon-btn {
+        @apply inline-flex items-center justify-center transition-colors;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-control);
+        color: var(--muted);
+        border: 1px solid transparent;
+    }
+    .icon-btn:hover {
+        background: var(--surface-2);
+        color: var(--ink);
+    }
+
+    /* Forms */
+    .label {
+        @apply mb-1 block text-[11px] font-bold uppercase tracking-[.12em];
+        color: var(--muted);
+    }
+    .field {
+        @apply w-full border px-3 py-2 text-sm font-medium transition-colors duration-150;
+        border-radius: var(--radius-control);
+        background: var(--surface);
+        border-color: var(--line);
+        color: var(--ink);
+    }
+    .field::placeholder {
+        color: color-mix(in srgb, var(--muted) 75%, transparent);
+        font-weight: 400;
+    }
+    .field:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--ring);
+    }
+    textarea.field {
+        line-height: 1.55;
+    }
+    select.field {
+        appearance: none;
+        background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+        background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+        background-size: 5px 5px, 5px 5px;
+        background-repeat: no-repeat;
+        padding-inline-end: 2rem;
+    }
+    [dir='rtl'] select.field {
+        background-position: 17px 50%, 12px 50%;
+    }
+
+    /* Card — a sheet of paper: hairline border, barely-there shadow, tight corners. */
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-soft);
+    }
+
+    /* Inline notice — a ruled margin note rather than a tinted bubble. */
+    .notice {
+        @apply flex items-start gap-2.5 border-s-2 px-3.5 py-2.5 text-sm font-medium;
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
+    }
+    .notice .mdi {
+        font-size: 1.1rem;
+        line-height: 1.35;
+        flex-shrink: 0;
+    }
+    .notice-error {
+        background: color-mix(in srgb, var(--rose-ink) 7%, transparent);
+        border-color: var(--rose-ink);
+        color: var(--rose-ink);
+    }
+    .notice-info {
+        background: color-mix(in srgb, var(--primary) 7%, transparent);
+        border-color: var(--primary);
+        color: var(--primary-ink);
+    }
+
+    /* Segmented tabs */
+    .tabs {
+        @apply inline-flex border;
+        border-radius: var(--radius-control);
+        background: transparent;
+        border-color: var(--line);
+    }
+    .tab {
+        @apply px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors duration-150;
+        color: var(--muted);
+    }
+    .tab + .tab {
+        border-inline-start: 1px solid var(--line);
+    }
+    .tab:hover {
+        color: var(--ink);
+        background: var(--surface-2);
+    }
+    .tab-active {
+        background: var(--primary);
+        color: #fff;
+    }
+    html.dark .tab-active {
+        color: #0e2724;
+    }
+    .tab-active:hover {
+        background: var(--primary-strong);
+        color: #fff;
+    }
+    html.dark .tab-active:hover {
+        color: #0e2724;
+    }
+
+    /* Table — ruled ledger rows, uppercase micro headers. */
+    .tbl {
+        @apply w-full text-sm;
+    }
+    .tbl thead th {
+        @apply px-4 py-2.5 text-start text-[10.5px] font-bold uppercase tracking-[.14em] whitespace-nowrap;
+        background: var(--surface-2);
+        color: var(--muted);
+        border-bottom: 1px solid var(--line);
+    }
+    .tbl thead th:first-child {
+        border-start-start-radius: 3px;
+    }
+    .tbl thead th:last-child {
+        border-start-end-radius: 3px;
+    }
+    .tbl tbody td {
+        @apply px-4 py-2.5 align-middle;
+        border-bottom: 1px solid var(--line-soft);
+    }
+    .tbl tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .tbl tbody tr {
+        transition: background-color .12s ease;
+    }
+    .tbl tbody tr:hover {
+        background: color-mix(in srgb, var(--primary) 5%, transparent);
+    }
+
+    /* Status badge — a small outlined tag rather than a soft pill. */
+    .badge {
+        @apply inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.08em] whitespace-nowrap;
+        border-radius: 2px;
+        padding: 2px 7px;
+    }
+    .badge::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 999px;
+        background: currentColor;
+        flex-shrink: 0;
+    }
+    .badge-paid,
+    .badge-active {
+        background: color-mix(in srgb, var(--emerald-ink) 12%, transparent);
+        color: var(--emerald-ink);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--emerald-ink) 30%, transparent);
+    }
+    .badge-unpaid {
+        background: color-mix(in srgb, var(--amber-ink) 13%, transparent);
+        color: var(--amber-ink);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--amber-ink) 32%, transparent);
+    }
+    .badge-inactive {
+        background: color-mix(in srgb, var(--muted) 12%, transparent);
+        color: var(--muted);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--muted) 28%, transparent);
+    }
+
+    /* Avatar with initials — flat tinted disc, no ring */
+    .avatar {
+        @apply inline-flex shrink-0 items-center justify-center rounded-full text-xs font-bold;
+        width: 34px;
+        height: 34px;
+        color: hsl(var(--av-h) 45% 28%);
+        background: hsl(var(--av-h) 38% 90%);
+    }
+    .avatar-lg {
+        width: 52px;
+        height: 52px;
+        font-size: 16px;
+    }
+    html.dark .avatar {
+        color: hsl(var(--av-h) 45% 80%);
+        background: hsl(var(--av-h) 25% 20%);
+    }
+
+    /* Stat card icon tile — a flat square stamp */
+    .stat-icon {
+        @apply inline-flex items-center justify-center;
+        width: 40px;
+        height: 40px;
+        border-radius: 3px;
+        font-size: 20px;
+    }
+
+    /* Profile hero banner — an ink masthead with a hairline rule. */
+    .profile-hero {
+        position: relative;
+        isolation: isolate;
+        background: var(--rail);
+        color: var(--rail-ink);
+        border-bottom: 3px double color-mix(in srgb, var(--rail-ink) 28%, transparent);
+    }
+    .profile-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-image: linear-gradient(color-mix(in srgb, var(--rail-ink) 5%, transparent) 1px, transparent 1px);
+        background-size: 100% 26px;
+    }
+    .hero-avatar {
+        display: grid;
+        place-items: center;
+        width: 68px;
+        height: 68px;
+        border-radius: 999px;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--rail-ink);
+        background: transparent;
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-ink) 45%, transparent);
+    }
+
+    /* Person link — quiet until hovered, so dense lists stay readable. */
+    .person-link {
+        font-weight: 700;
+        color: var(--ink);
+        text-decoration: none;
+    }
+    .person-link:hover {
+        color: var(--primary-ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    /* Money is set in mono with tabular figures so columns align down the page.
+       The Arabic fallbacks keep the currency word (e.g. «اف») in a proper
+       Arabic face, since IBM Plex Mono has no Arabic glyphs. */
+    .num {
+        font-family: var(--font-mono), 'Noto Sans Arabic', 'Noto Naskh Arabic', ui-sans-serif, monospace;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: 'tnum' 1;
+        letter-spacing: -.01em;
+    }
+
+    /* Floating navigation rail */
+    .rail {
+        position: fixed;
+        inset-block: var(--rail-gap);
+        inset-inline-start: var(--rail-gap);
+        z-index: 45;
+        display: flex;
+        flex-direction: column;
+        width: var(--rail-w);
+        max-height: calc(100vh - var(--rail-gap) * 2);
+        overflow: hidden;
+        color: var(--rail-ink);
+        background: var(--rail);
+        border: 1px solid var(--rail-line);
+        border-radius: 4px;
+        box-shadow: 0 18px 36px -22px rgba(0, 0, 0, .6);
+        transform: translateX(var(--rail-off));
+        transition: transform .3s cubic-bezier(.32, .72, .24, 1);
+    }
+
+    .rail-brand {
+        display: flex;
+        align-items: center;
+        gap: .625rem;
+        min-width: 0;
+        padding: .9rem 1rem;
+        color: inherit;
+        text-decoration: none;
+        border-bottom: 1px solid var(--rail-line);
+    }
+    .rail-mark {
+        @apply grid shrink-0 place-items-center overflow-hidden;
+        width: 40px;
+        height: 40px;
+        background: #fff;
+        border-radius: 50%;
+    }
+    .rail-mark img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .rail-brand:hover .rail-mark {
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--rail-ink) 45%, transparent);
+    }
+    .rail-brand-text {
+        min-width: 0;
+        line-height: 1.3;
+    }
+    .rail-brand-name {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--rail-ink);
+    }
+    .rail-brand-sub {
+        display: block;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: var(--rail-faint);
+    }
+
+    .rail-nav {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: .6rem 0 .9rem;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, .14) transparent;
+    }
+
+    /* A single thumb slides between links instead of restyling each one. */
+    .rail-thumb {
+        position: absolute;
+        top: 0;
+        inset-inline: 0;
+        z-index: 0;
+        height: 34px;
+        background: color-mix(in srgb, var(--rail-ink) 9%, transparent);
+        border-radius: 0;
+        box-shadow: inset 0 -1px 0 var(--rail-line), inset 0 1px 0 var(--rail-line);
+        pointer-events: none;
+        transition: transform .3s cubic-bezier(.34, 1.3, .44, 1), opacity .2s ease;
+    }
+    .rail-thumb::after {
+        content: '';
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: 0;
+        width: 3px;
+        background: var(--rail-accent);
+    }
+
+    .rail-group + .rail-group {
+        margin-top: 1rem;
+    }
+    .rail-group-label {
+        padding-inline: 1rem;
+        margin-bottom: .35rem;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: var(--rail-faint);
+    }
+
+    .rail-link {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        height: 34px;
+        padding-inline: 1rem;
+        border-radius: 0;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--rail-muted);
+        text-decoration: none;
+        transition: color .16s ease, background-color .16s ease;
+    }
+    .rail-link:hover {
+        color: var(--rail-ink);
+        background: var(--rail-wash);
+    }
+    .rail-link:focus-visible {
+        outline: 1px solid var(--rail-accent);
+        outline-offset: -1px;
+    }
+    .rail-link[data-active='true'] {
+        color: var(--rail-ink);
+        font-weight: 700;
+    }
+    .rail-link .mdi {
+        width: 1.25rem;
+        flex-shrink: 0;
+        font-size: 17px;
+        text-align: center;
+        transition: color .16s ease;
+    }
+    .rail-link[data-active='true'] .mdi {
+        color: var(--rail-accent);
+    }
+    .rail-link-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .rail-foot {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        padding: .7rem .85rem;
+        background: transparent;
+        border-top: 1px solid var(--rail-line);
+    }
+    .rail-avatar {
+        @apply grid shrink-0 place-items-center rounded-full;
+        width: 32px;
+        height: 32px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--rail-ink);
+        background: transparent;
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-ink) 40%, transparent);
+    }
+    .rail-foot-meta {
+        flex: 1;
+        min-width: 0;
+        line-height: 1.25;
+    }
+    .rail-foot-name {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--rail-ink);
+    }
+    .rail-foot-code {
+        display: block;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        color: var(--rail-faint);
+    }
+    .rail-logout {
+        @apply grid shrink-0 place-items-center;
+        width: 30px;
+        height: 30px;
+        border-radius: 3px;
+        font-size: 17px;
+        color: var(--rail-muted);
+        transition: color .15s ease, background-color .15s ease;
+    }
+    .rail-logout:hover {
+        color: #fff;
+        background: color-mix(in srgb, var(--rose-ink) 70%, #000);
+    }
+
+    .rail-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: rgba(19, 19, 16, .5);
+    }
+
+    /* Main shell */
+    .shell {
+        --rail-off: -120%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: padding-inline-start .3s cubic-bezier(.32, .72, .24, 1);
+    }
+    html[dir='rtl'] .shell {
+        --rail-off: 120%;
+    }
+    .shell.rail-open .rail {
+        transform: none;
+    }
+    .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        gap: .625rem;
+        padding: .55rem 1rem;
+        background: var(--bg);
+        border-bottom: 1px solid var(--line);
+    }
+    .topbar-date {
+        display: none;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        white-space: nowrap;
+    }
+    .top-tools {
+        @apply ms-auto flex flex-wrap items-center gap-2.5;
+    }
+    .main {
+        flex: 1;
+        width: 100%;
+        max-width: 1400px;
+        margin-inline: auto;
+        padding: 1.75rem 1.25rem 3rem;
+    }
+
+    @media (min-width: 640px) {
+        .topbar-date {
+            display: block;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .shell {
+            padding-inline-start: calc(var(--rail-w) + var(--rail-gap) * 2);
+        }
+        .shell .rail {
+            transform: none;
+        }
+        .shell.rail-collapsed {
+            padding-inline-start: 0;
+        }
+        .shell.rail-collapsed .rail {
+            transform: translateX(var(--rail-off));
+        }
+        .rail-backdrop {
+            display: none;
+        }
+        .topbar {
+            gap: .75rem;
+            padding: .55rem 2rem;
+        }
+        .main {
+            padding: 2.25rem 2rem 3.5rem;
+        }
+    }
+
+    /* Toast */
+    .toast {
+        @apply pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold;
+        border-radius: var(--radius-control);
+        background: var(--ink);
+        color: var(--bg);
+        box-shadow: var(--shadow-pop);
+        animation: toast-in .28s cubic-bezier(.32, .72, .24, 1);
+    }
+    .toast-error {
+        background: var(--rose-ink);
+        color: #fff;
+    }
+
+    /* Transitions */
+    .page-enter-active,
+    .page-leave-active {
+        transition: opacity .16s ease, transform .16s ease;
+    }
+    .page-enter-from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    .page-leave-to {
+        opacity: 0;
+    }
+    .modal-enter-active,
+    .modal-leave-active {
+        transition: opacity .18s ease;
+    }
+    .modal-enter-active .modal-card,
+    .modal-leave-active .modal-card {
+        transition: transform .2s cubic-bezier(.32, .72, .24, 1), opacity .18s ease;
+    }
+    .modal-enter-from,
+    .modal-leave-to {
+        opacity: 0;
+    }
+    .modal-enter-from .modal-card {
+        transform: translateY(14px) scale(.97);
+    }
+    .modal-leave-to .modal-card {
+        transform: translateY(8px) scale(.98);
+    }
+    .nav-fade-enter-active,
+    .nav-fade-leave-active {
+        transition: opacity .2s ease;
+    }
+    .nav-fade-enter-from,
+    .nav-fade-leave-to {
+        opacity: 0;
+    }
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.fade-up {
+    animation: fade-up .35s cubic-bezier(.32, .72, .24, 1) both;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Dark-mode remaps for legacy utility classes still used in pages    */
+/* ------------------------------------------------------------------ */
+html.dark .text-slate-500 { color: var(--muted); }
+html.dark .text-slate-600 { color: var(--muted); }
+html.dark .text-slate-700 { color: var(--ink); }
+html.dark .text-slate-800 { color: var(--ink); }
+html.dark .text-slate-900 { color: var(--ink); }
+html.dark .bg-white { background-color: var(--surface); }
+html.dark .bg-slate-50 { background-color: var(--surface-2); }
+html.dark .hover\:bg-slate-50:hover { background-color: var(--surface-2); }
+html.dark .border-slate-100 { border-color: var(--line); }
+html.dark .border-slate-200 { border-color: var(--line); }
+html.dark .border-slate-300 { border-color: var(--line); }
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--line); }
+html.dark .text-emerald-700 { color: var(--emerald-ink); }
+html.dark .text-emerald-600 { color: var(--emerald-ink); }
+html.dark .bg-emerald-50 { background-color: color-mix(in srgb, var(--emerald-ink) 12%, transparent); }
+html.dark .text-rose-700 { color: var(--rose-ink); }
+html.dark .text-rose-600 { color: var(--rose-ink); }
+html.dark .bg-rose-50 { background-color: color-mix(in srgb, var(--rose-ink) 12%, transparent); }
+html.dark .text-amber-700 { color: var(--amber-ink); }
+html.dark .text-amber-800 { color: var(--amber-ink); }
+html.dark .bg-amber-50 { background-color: color-mix(in srgb, var(--amber-ink) 12%, transparent); }
+html.dark .text-indigo-600 { color: var(--primary-ink); }
+html.dark .text-indigo-700 { color: var(--primary-ink); }
+html.dark .bg-indigo-50 { background-color: var(--primary-soft); }
+html.dark .ring-indigo-200 { --tw-ring-color: color-mix(in srgb, var(--primary) 35%, transparent); }
+html.dark .text-orange-600 { color: var(--amber-ink); }
+html.dark .bg-orange-50 { background-color: color-mix(in srgb, var(--amber-ink) 12%, transparent); }
+
+/* Arabic and Pashto read better without Latin letter-spacing or forced capitals. */
+[dir='rtl'] .page-title,
+[dir='rtl'] .label,
+[dir='rtl'] .tbl thead th,
+[dir='rtl'] .badge,
+[dir='rtl'] .uppercase,
+[dir='rtl'] [class*='tracking-'],
+[dir='rtl'] .rail-group-label,
+[dir='rtl'] .rail-brand-sub {
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+[dir='rtl'] .rail-logout .mdi {
+    transform: scaleX(-1);
+}
+
+/* Dari and Pashto copy starts at the right edge, without mirroring the letters. */
+html[dir='rtl'] {
+    text-align: right;
+    transform: none !important;
+}
+
+html[dir='rtl'] input,
+html[dir='rtl'] textarea,
+html[dir='rtl'] select,
+html[dir='rtl'] th,
+html[dir='rtl'] td,
+html[dir='rtl'] .field {
+    direction: rtl;
+    text-align: right;
+}
+
+.actions-end {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}

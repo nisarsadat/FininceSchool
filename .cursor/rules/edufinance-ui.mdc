@@ -1,0 +1,13 @@
+---
+description: EduFinance Pro layout, currency, and list conventions
+alwaysApply: true
+---
+
+# EduFinance UI
+
+- Show money as `اف`, never `AFN`. Format amounts with `afn()` in `resources/js/format.js`.
+- Dari (`fa`) and Pashto (`ps`) are RTL. Text starts at the right. Do not mirror the page with `scaleX` or `direction: rtl` on Latin brands. Keep `EduFinance Pro` and Latin codes `dir="ltr"`.
+- Page headers use `page-head` with `justify-between`: the title stays at the start, and the create button sits at the end of that row.
+- Navigation is a floating graphite rail (`resources/js/layouts/AppLayout.vue`): fixed, rounded, dark in both themes, links grouped into `Overview` / `People` / `Money` / `System` from `resources/js/nav.js`. A single `.rail-thumb` slides to the active link via `offsetTop`, so re-run `placeThumb()` after route, locale, and font changes. Keep the rail monochrome apart from the `--primary` thumb bar. The top-bar toggle slides the rail away on desktop and opens it as a drawer below `lg`.
+- Paginate tables, card grids, and side lists that can grow. Use `usePagination` and `Pagination`. Show the pager only when there is more than one page.
+- A user who can manage roles can create a new role from Users, with its own name and permissions.
