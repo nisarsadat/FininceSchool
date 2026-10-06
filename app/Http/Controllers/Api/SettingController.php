@@ -36,10 +36,12 @@ class SettingController extends Controller
     }
 
     /**
-     * Factory-reset the desk: wipe every data table in one statement and
-     * restore the original demo dataset. The schema (and the migrations
-     * table) is left alone, so this stays a pair of round trips instead of a
-     * full drop-and-recreate that would time out in a serverless request.
+     * Factory-reset the desk: wipe every data table in one statement, then
+     * recreate the roles/permissions graph and the single ADMIN login. No
+     * demo records come back — students, fees, salaries, expenses, accounts
+     * and users all stay empty. The schema (and the migrations table) is
+     * left alone, so this stays a pair of round trips instead of a full
+     * drop-and-recreate that would time out in a serverless request.
      *
      * All personal access tokens are discarded with the data, so everyone is
      * signed out — including whoever pressed the button.
@@ -59,7 +61,11 @@ class SettingController extends Controller
             DB::statement("TRUNCATE TABLE {$list} RESTART IDENTITY CASCADE");
         }
 
-        $exit = Artisan::call('db:seed', ['--force' => true]);
+        // Only the admin login is recreated — the desk itself stays empty.
+        $exit = Artisan::call('db:seed', [
+            '--class' => \Database\Seeders\AdminSeeder::class,
+            '--force' => true,
+        ]);
 
         if ($exit !== 0) {
             return response()->json(['message' => 'Reset failed.'], 500);

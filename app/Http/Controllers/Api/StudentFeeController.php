@@ -27,7 +27,7 @@ class StudentFeeController extends Controller
                 $query->whereHas('student', fn ($student) => $student->where('name', 'like', "%{$search}%"));
             })
             ->orderByDesc('hijri_month')
-            ->orderByDesc('hijri_day')
+            ->orderByDesc('receipt_day')
             ->get();
 
         return response()->json(['data' => $payments, 'year' => $year]);

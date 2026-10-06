@@ -26,7 +26,7 @@ class TeacherSalaryController extends Controller
                 $query->whereHas('teacher', fn ($teacher) => $teacher->where('name', 'like', "%{$search}%"));
             })
             ->orderByDesc('hijri_month')
-            ->orderByDesc('hijri_day')
+            ->orderByDesc('receipt_day')
             ->get();
 
         return response()->json(['data' => $payments, 'year' => $year]);
