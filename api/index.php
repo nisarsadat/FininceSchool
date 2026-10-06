@@ -26,4 +26,12 @@ putenv('LOG_CHANNEL=stderr');
 // Without this, Laravel generates http:// asset URLs (mixed content).
 $_SERVER['HTTPS'] = 'on';
 
+// TEMP DIAGNOSTIC: report how the runtime hands the path to PHP.
+header('X-Probe-Request-Uri: '.($_SERVER['REQUEST_URI'] ?? ''));
+header('X-Probe-Script-Name: '.($_SERVER['SCRIPT_NAME'] ?? ''));
+header('X-Probe-Php-Self: '.($_SERVER['PHP_SELF'] ?? ''));
+header('X-Probe-Script-Filename: '.($_SERVER['SCRIPT_FILENAME'] ?? ''));
+header('X-Probe-Path-Info: '.($_SERVER['PATH_INFO'] ?? ''));
+header('X-Probe-Query-String: '.($_SERVER['QUERY_STRING'] ?? ''));
+
 require __DIR__.'/../public/index.php';
