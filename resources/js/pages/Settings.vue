@@ -43,12 +43,32 @@
                 {{ saving ? t('common.saving') : t('common.save') }}
             </button>
         </form>
+
+        <div class="card max-w-xl mt-5 p-5">
+            <p class="font-bold">{{ t('settings.resetTitle') }}</p>
+            <p class="mt-1 text-sm text-[var(--muted)]">{{ t('settings.resetLead') }}</p>
+            <button class="btn btn-danger mt-4" type="button" :disabled="resetting" @click="resetOpen = true">
+                <i class="mdi mdi-restore-variant text-lg"></i>
+                {{ t('settings.resetBtn') }}
+            </button>
+        </div>
+
+        <ConfirmDialog
+            :open="resetOpen"
+            :title="t('settings.resetTitle')"
+            :message="t('settings.resetConfirm')"
+            :confirm-label="t('settings.resetBtn')"
+            :busy="resetting"
+            @close="resetOpen = false"
+            @confirm="reset"
+        />
     </AppLayout>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import AppLayout from '../layouts/AppLayout.vue';
+import ConfirmDialog from '../components/ConfirmDialog.vue';
 import http from '../http';
 import { errorMessage } from '../format';
 import { applyDeskDefaults, notify, store } from '../store';
@@ -56,6 +76,8 @@ import { t } from '../i18n';
 
 const saving = ref(false);
 const formError = ref('');
+const resetOpen = ref(false);
+const resetting = ref(false);
 const form = reactive({
     school_name: '',
     address: '',
@@ -89,6 +111,20 @@ async function save() {
         formError.value = errorMessage(error);
     } finally {
         saving.value = false;
+    }
+}
+
+async function reset() {
+    resetting.value = true;
+    try {
+        await http.post('/settings/reset');
+        localStorage.removeItem('ef_token');
+        window.location.assign('/login');
+    } catch (error) {
+        resetOpen.value = false;
+        notify(errorMessage(error), 'error');
+    } finally {
+        resetting.value = false;
     }
 }
 

@@ -18,13 +18,17 @@
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.9.0",
-            "maxDuration": 30
+            "maxDuration": 120
         }
     },
     "routes": [
         {
             "src": "/build/(.*)",
             "dest": "/public/build/$1"
+        },
+        {
+            "src": "/(.*[.](?:png|jpe?g|gif|webp|svg|ico|woff2?|ttf|otf|eot))$",
+            "dest": "/public/$1"
         },
         {
             "src": "/favicon.ico",

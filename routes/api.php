@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('permission:settings.manage')->group(function () {
         Route::get('/settings', [SettingController::class, 'show']);
         Route::put('/settings', [SettingController::class, 'update']);
+        Route::post('/settings/reset', [SettingController::class, 'reset']);
     });
 
     Route::middleware('permission:users.manage')->group(function () {

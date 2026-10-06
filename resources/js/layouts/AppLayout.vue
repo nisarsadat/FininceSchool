@@ -75,13 +75,17 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import logoUrl from '../../../public/android-chrome-192x192.png';
 import GlobalSearch from '../components/GlobalSearch.vue';
 import LocaleTheme from '../components/LocaleTheme.vue';
 import { t } from '../i18n';
 import { linkAllowed, navGroups } from '../nav';
 import { can, loadUser, logout, setYear, store } from '../store';
 
-const schoolLogo = '/android-chrome-192x192.png';
+// Import the mark so Vite hashes it into /build/assets: plain /public URLs
+// fall through to the SPA on Vercel and come back as HTML, which renders a
+// blank image.
+const schoolLogo = logoUrl;
 const open = ref(false);
 const collapsed = ref(localStorage.getItem('ef_nav_open') === '0');
 const wide = ref(window.matchMedia('(min-width: 1024px)').matches);
