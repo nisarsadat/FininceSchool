@@ -22,4 +22,8 @@ putenv('APP_SERVICES_CACHE=/tmp/cache/services.php');
 putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
 putenv('LOG_CHANNEL=stderr');
 
+// Vercel terminates TLS at the edge; the PHP runtime sees plain HTTP.
+// Without this, Laravel generates http:// asset URLs (mixed content).
+$_SERVER['HTTPS'] = 'on';
+
 require __DIR__.'/../public/index.php';
