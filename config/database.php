@@ -97,6 +97,7 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'connect_via_port' => env('DB_PORT', '5432').";options='endpoint=".env('DB_ENDPOINT', 'ep-billowing-paper-b5sarjrc')."'",
         ],
 
         'sqlsrv' => [

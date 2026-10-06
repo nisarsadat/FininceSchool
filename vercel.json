@@ -1,7 +1,19 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "env": {
-        "APP_DEBUG": "true"
+        "APP_DEBUG": "true",
+        "APP_ENV": "production",
+        "APP_URL": "https://finince-school.vercel.app",
+        "DB_CONNECTION": "pgsql",
+        "DB_HOST": "ep-billowing-paper-b5sarjrc-pooler.c-7.us-east-2.aws.neon.tech",
+        "DB_PORT": "5432",
+        "DB_DATABASE": "neondb",
+        "DB_USERNAME": "neondb_owner",
+        "DB_SSLMODE": "require",
+        "DB_ENDPOINT": "ep-billowing-paper-b5sarjrc",
+        "SESSION_DRIVER": "database",
+        "CACHE_STORE": "database",
+        "QUEUE_CONNECTION": "database"
     },
     "functions": {
         "api/index.php": {
